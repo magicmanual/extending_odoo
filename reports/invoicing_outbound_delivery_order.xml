@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <report
+                id="outbound_delivery_order"
+                model="account.move"
+                string="Outbound Delivery Order"
+                name="extending_odoo.outbound_delivery_order"
+                file="outbound_delivery_order"
+                report_type="xlsx"/>
+
+
+
+    </data>
+</odoo>
