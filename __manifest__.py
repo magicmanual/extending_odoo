@@ -34,6 +34,7 @@
         'views/stock_production_lot_form.xml',
         'reports/invoicing_outbound_delivery_order.xml',
         'views/sale_order_form_ext.xml',
+        'security/ir.model.access.csv',
 
     ],
 

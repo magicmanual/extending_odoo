@@ -6,7 +6,7 @@
                 id="outbound_delivery_order"
                 model="account.move"
                 string="Outbound Delivery Order"
-                name="extending_odoo.outbound_delivery_order"
+                name="outbound.delivery.order"
                 file="outbound_delivery_order"
                 report_type="xlsx"/>
 
