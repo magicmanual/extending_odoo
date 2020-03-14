@@ -1,8 +1,17 @@
-from odoo import models
+from odoo import models,api
+import re
 
 class OutboundDelieveryOrder(models.Model):
     _name = 'report.outbound.delivery.order'
     _inherit = ['report.report_xlsx.abstract','account.invoice.report']
+
+    def write_production_licence(self,product_template,sheet,row,column,format_general):
+            if product_template.certificate_id.is_imported==True:
+                    sheet.write(row, column, '', format_general)
+            else:
+                    sheet.write(row, column,product_template.certificate_id.production_license , format_general)
+            return
+
 
     def ensure_one_for_list(self,list):
             if len(list)==1:
@@ -61,9 +70,11 @@ class OutboundDelieveryOrder(models.Model):
             sheet.write(row,column, '桂南食药监械经营许20170354号', format_general)
             column += 1
             #生产企业许可证号 单元格 画格子
-            sheet.write(row,column, '', format_general)
+            #sheet.write(row,column, '', format_general)
+            self.write_production_licence(product_template,sheet,row,column,format_general)
             column += 1
             #print 注册证号
+            sheet.write(row,column, product_template.certificate_id.name, format_general)
 
             column += 1
             #print 储运条件
@@ -110,11 +121,15 @@ class OutboundDelieveryOrder(models.Model):
             #single_record = self.browse(1)
             #self.write_one_row(sheet,4,single_record,format_of_table_content,format_of_table_content_date)
             row=4
-            recordset = self.env['report.outbound.delivery.order'].search([])
+            #get current invoice id
+            #invoice_id=self.invoice_ids.id
+
+            invoice_id=int(re.findall('\d+',data['data'])[0])
+            recordset = self.env['report.outbound.delivery.order'].search([('move_id','=',invoice_id)])
             for record in recordset:
                     self.write_one_row(sheet,row,record,format_of_table_content,format_of_table_content_date)
                     row+=1
-
+                    print('print out delivery for invoice_id=',invoice_id)
 
 
 """

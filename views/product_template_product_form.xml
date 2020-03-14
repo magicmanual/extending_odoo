@@ -10,6 +10,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='barcode']" position="after">
                     <field name="manufacturer" widget="res_partner_many2one" context="{'res_partner_search_mode': 'Manufacturer', 'show_address': 1, 'show_vat': True}" options="{&quot;always_reload&quot;: True}"/>
+                    <field name="certificate_id"/>
                 </xpath>
 
             </field>

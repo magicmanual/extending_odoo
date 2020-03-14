@@ -10,6 +10,8 @@ pgAdmin4 Installation Directory: /Library/PostgreSQL/12/pgAdmin 4
 Stack Builder Installation Directory: /Library/PostgreSQL/12
 
 sudo -u postgres pg_ctl -D /Library/PostgreSQL/12/data start
+#to restart
+sudo -u postgres pg_ctl -D /Library/PostgreSQL/12/data restart
 
 access_extending_odoo_extending_odoo,extending_odoo.extending_odoo,model_extending_odoo_extending_odoo,base.group_user,1,1,1,1
 access_extending_odoo_report_extending_odoo_outbound_delivery_order,extending_odoo.report_extending_odoo_outbound_delivery_order,model_report_extending_odoo_outbound_delivery_order,base.group_user,1,1,1,1

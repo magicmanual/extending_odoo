@@ -6,6 +6,7 @@ class ProductTemplate (models.Model):
 
     manufacturer=fields.Many2one('res.partner',string='Manufacturer')
     #manufacturer=fields.Char('Manufacturer',required=True)
+    certificate_id=fields.Many2one('certificate.number',string='Certificate Number')
 
     type = fields.Selection([
         ('product', 'Storable Product'),
