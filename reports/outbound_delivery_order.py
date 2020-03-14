@@ -1,4 +1,6 @@
 from odoo import models,api
+from xlsxwriter.utility import xl_range
+import cn2an
 import re
 
 class OutboundDelieveryOrder(models.Model):
@@ -123,6 +125,8 @@ class OutboundDelieveryOrder(models.Model):
             format_of_table_head = workbook.add_format({'font_size': 9, 'align': 'center','valign':'vcenter','border':True,'text_wrap':True,'bold':True})
             format_of_table_content = workbook.add_format({'font_size': 9, 'align': 'center','valign':'vcenter','border':True,'text_wrap':True})
             format_of_table_content_date = workbook.add_format({'font_size': 9, 'align': 'center', 'valign': 'vcenter', 'border': True, 'text_wrap': True,'num_format':'yyyy-mm-dd'})
+            format_company_info=workbook.add_format({'font_size': 9, 'align': 'left', 'valign': 'vcenter'})
+            format_of_table_content_address = workbook.add_format({'font_size': 9, 'align': 'left', 'valign': 'vcenter', 'border': True, 'text_wrap': True})
 
 
             #single_record = self.browse(1)
@@ -158,6 +162,38 @@ class OutboundDelieveryOrder(models.Model):
                     print('print out delivery for invoice_id=',invoice_id)
                     print('patient name is: ', sale_order.patient_name)
                     print((account_move.invoice_partner_display_name if account_move.invoice_partner_display_name != False else 'false'))
+
+
+            #write the tail of table
+            sheet.merge_range(row,0,row,4,'合计',format_of_table_content)
+            sum_range= xl_range(4,9,row-1,9)
+            sum_formula='=SUM(%s)' % sum_range
+            sheet.merge_range(row, 5, row, 13,sum_formula , format_of_table_content)
+            row+=1
+            #write chinese total
+            sheet.merge_range(row, 0, row, 1, '金额合计（大写）：', format_of_table_content)
+            total_in_chinese=cn2an.an2cn(account_move.amount_total,"rmb")
+            sheet.merge_range(row, 2, row, 13, total_in_chinese, format_of_table_head)
+            row+=1
+            #write info of our company
+            sheet.merge_range(row, 0, row, 13, '公司地址：广西南宁市白沙大道35号南国花园商城D1栋D1-2号、D1-4号房', format_of_table_content_address)
+            row+=1
+            sheet.write(row, 0, '备注:', format_company_info)
+            sheet.merge_range(row, 1, row, 13, '1、本发货单加盖本公司印章方可提货，提货前与仓库联系。', format_company_info)
+            row+=1
+            sheet.merge_range(row, 1, row, 13, '2、客户提货时请验看货物，出库后不接受无理由退货。', format_company_info)
+            row+=1
+            sheet.merge_range(row, 1, row, 13, '3、请客户在发货单有效期内提货，如逾期或未提货，须重新办理有关手续，由此产生的一切费用由需方自理。', format_company_info)
+            row+=1
+            sheet.merge_range(row, 1, row, 13, '4、此发货单一式五联，第一联：存根（白）第二联：结算（粉）第三联：保管（绿）第四联：装货（蓝）。', format_company_info)
+            row+=1
+            sheet.merge_range(row, 1, row, 13, '5、如有问题，请及时与本公司联系。', format_company_info)
+            row+=1
+            sheet.merge_range(row, 0, row, 13, '  制单：唐舒恩              提货人：彭军          客户签收：              签收日期：', format_company_info)
+
+
+
+
 
 
             return
