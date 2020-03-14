@@ -1,6 +1,7 @@
 from odoo import models,api
 from xlsxwriter.utility import xl_range
 import cn2an
+from pypinyin import pinyin, lazy_pinyin, Style
 import re
 
 class OutboundDelieveryOrder(models.Model):
@@ -108,6 +109,117 @@ class OutboundDelieveryOrder(models.Model):
             sheet.write(row,column, '常温', format_general)
             return
 
+    def write_one_row_of_contract(self,sheet,row,single_record,format_general):
+            column=0
+            #write the first row
+            sheet.write(row,column,'',format_general)
+            column+=1
+            #print product_name,reference_code,manufacturer
+            product_template=single_record.product_id
+            sheet.write(row,column, product_template.name, format_general)
+            column += 1
+            sheet.write(row,column, product_template.default_code, format_general)
+            column += 1
+            sheet.write(row,column, product_template.manufacturer.name, format_general)
+            column += 1
+
+            #print UOM
+            uom_uom=single_record.product_uom_id
+            sheet.write(row,column,uom_uom.name,format_general)
+            column+=1
+
+            #blank 包装 cell
+            sheet.write(row,column,'',format_general)
+            column+=1
+
+            #print price_unit as 未打折扣的供医院价格
+            account_move_line=self.env['account.move.line'].browse(single_record.id)
+            sheet.write(row,column, account_move_line.price_unit, format_general)
+            column += 1
+            # print price_average as 已打折扣的供货价格
+            sheet.write(row,column, single_record.price_average, format_general)
+            column += 1
+            #print quantity of the product
+            sheet.write(row,column,single_record.quantity,format_general)
+            column += 1
+            #print price_subtotal 该产品供货总金额，理论上是：price_average*quantity
+            sheet.write(row,column, single_record.price_subtotal, format_general)
+            column += 1
+            #print 注册证号
+            sheet.write(row,column, product_template.certificate_id.name, format_general)
+
+            return
+
+
+    def generate_contract(self,workbook,data,lines,recordset,account_move,sale_order):
+
+            format_of_title=workbook.add_format({'font_name':'SimSun','font_size':12,'align':'center','valign':'center','bold':True})
+            format_of_table_title=workbook.add_format({'font_name':'SimSun','font_size':11,'align':'left','valign':'vcenter','border': True,'shrink':True})
+            format_of_table_head=workbook.add_format({'font_name':'SimSun','font_size':11,'align':'center','valign':'vcenter','border': True})
+            format_of_table_content_total=workbook.add_format({'font_name':'SimSun','font_size':11,'align':'center','valign':'vcenter','border': True,'bold':True,'shrink':True})
+            format_of_contract_content=workbook.add_format({'font_name':'SimSun','font_size':10,'align':'left','valign':'vcenter','right': True,'text_wrap':True})
+
+            format_of_table_content = workbook.add_format(
+                    {'font_name': 'SimSun', 'font_size': 10, 'align': 'center', 'valign': 'vcenter', 'border': True,'text_wrap':True})
+
+
+            sheet_of_contract=workbook.add_worksheet('国控广西采购合同')
+
+            sheet_of_contract.insert_image(0,0,'/Users/wuhua/GitHub/custom_addons/extending_odoo/images/guokongGX.png',{'x_scale': 1.2, 'y_scale': 1.4})
+            sheet_of_contract.merge_range(0,0,0,10,'')
+            sheet_of_contract.set_row(0,36)
+            row=1
+            sheet_of_contract.merge_range(row,0,row,7,'共1页第1页             国药控股广西有限公司购进合同',format_of_title)
+            #get the abbreviation_of_patient_name
+            abbreviation_of_patient_name_list=pinyin((sale_order.patient_name if sale_order.patient_name != False else 'false'),style=Style.FIRST_LETTER)
+            abbreviation_of_patient_name=''
+            for alph in abbreviation_of_patient_name_list:
+                    abbreviation_of_patient_name+=alph[0]
+
+            sheet_of_contract.merge_range(row, 8, row, 10, '编号：'+account_move.partner_id.abbreviation+'-'+abbreviation_of_patient_name.upper()+'-'+(sale_order.date_of_surgery.strftime("%m%d") if sale_order.date_of_surgery != False else 'false' ) ,format_of_title)
+
+            row+=1
+
+            sheet_of_contract.merge_range(row,0,row,10,'合同有效期至：        年        月        日                 签约地点：广西南宁                        签约时间：        年        月        日',format_of_table_title)
+            row+=1
+            col=0
+
+            sheet_of_contract.write(row,0,'货品ID',format_of_table_head)
+            sheet_of_contract.write(row, 1, '品名', format_of_table_head)
+            sheet_of_contract.write(row, 2, '规格', format_of_table_head)
+            sheet_of_contract.write(row, 3, '生产厂家', format_of_table_head)
+            sheet_of_contract.write(row, 4, '单位', format_of_table_head)
+            sheet_of_contract.write(row, 5, '包装', format_of_table_head)
+            sheet_of_contract.write(row, 6, '供医院价', format_of_table_head)
+            sheet_of_contract.write(row, 7, '供货价', format_of_table_head)
+            sheet_of_contract.write(row, 8, '数量', format_of_table_head)
+            sheet_of_contract.write(row, 9, '金额', format_of_table_head)
+            sheet_of_contract.write(row, 10, '注册证（备案凭证）号', format_of_table_head)
+            row+=1
+
+            #write every row
+            for rec in recordset:
+                    self.write_one_row_of_contract(sheet_of_contract,row,rec,format_of_table_content)
+                    row+=1
+
+            #write total of the amount
+            #write chinese total
+            #sheet_of_contract.merge_range(row, 0, row, 1, '金额合计（大写）：', format_of_table_content)
+            total_in_chinese=cn2an.an2cn(account_move.amount_total,"rmb")
+            sheet_of_contract.merge_range(row, 0, row, 7, '金额合计（大写）：'+total_in_chinese, format_of_table_content_total)
+            #write total in arab number
+            sheet_of_contract.merge_range(row,8,row,9,'金额合计（小写）：',format_of_table_content_total)
+            sheet_of_contract.write(row,10,account_move.amount_total,format_of_table_content_total)
+            row+=1
+            sheet_of_contract.merge_range(row,0,row,10,'双方经充分协商，签订本合同，共同信守，未尽事宜，按《中华人民共和国合同法》、《质量保证协议》、医疗器械相关法律法规等有关规定执行。',format_of_table_head)
+            row+=1
+            sheet_of_contract.merge_range(row,0,row,5,'一、质量标准：符合现行器械相关标准,每批来货附合格证或成品检验报告书，进口医疗器械附报关单；包装、标签和说明书应符合国家有关规定和运输要求。',format_of_contract_content)
+
+
+
+            return
+
+
 
 
 
@@ -192,9 +304,8 @@ class OutboundDelieveryOrder(models.Model):
             sheet.merge_range(row, 0, row, 13, '  制单：唐舒恩              提货人：彭军          客户签收：              签收日期：', format_company_info)
 
 
-
-
-
+        #generate contract with guokongGX
+            self.generate_contract(workbook,data,lines,recordset,account_move,sale_order)
 
             return
 

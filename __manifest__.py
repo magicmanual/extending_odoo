@@ -23,6 +23,19 @@
     'depends': ['stock',
                 'product',
                 'sale',
+                'crm',
+                #copy
+                'base_setup',
+                'sales_team',
+                'mail',
+                'calendar',
+                'resource',
+                'fetchmail',
+                'utm',
+                'web_tour',
+                'contacts',
+                'digest',
+                'phone_validation',
                 ],
 
     # always loaded
@@ -35,6 +48,7 @@
         'reports/invoicing_outbound_delivery_order.xml',
         'views/sale_order_form_ext.xml',
         'security/ir.model.access.csv',
+        'views/res_partner_form.xml',
 
     ],
 
