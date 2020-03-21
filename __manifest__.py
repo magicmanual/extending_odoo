@@ -36,6 +36,7 @@
                 'contacts',
                 'digest',
                 'phone_validation',
+                'sale_stock',
                 ],
 
     # always loaded
@@ -49,6 +50,8 @@
         'views/sale_order_form_ext.xml',
         'security/ir.model.access.csv',
         'views/res_partner_form.xml',
+        'views/sale_order_form_sale_stock_ext.xml',
+        'views/sale_order_tree_ext.xml',
 
     ],
 

@@ -209,7 +209,9 @@ class OutboundDelieveryOrder(models.Model):
             sheet_of_contract.merge_range(row, 0, row, 7, '金额合计（大写）：'+total_in_chinese, format_of_table_content_total)
             #write total in arab number
             sheet_of_contract.merge_range(row,8,row,9,'金额合计（小写）：',format_of_table_content_total)
-            sheet_of_contract.write(row,10,account_move.amount_total,format_of_table_content_total)
+            sum_range= xl_range(4,9,row-1,9)
+            sum_formula='=SUM(%s)' % sum_range
+            sheet_of_contract.write(row,10,sum_formula,format_of_table_content_total)
             row+=1
             sheet_of_contract.merge_range(row,0,row,10,'双方经充分协商，签订本合同，共同信守，未尽事宜，按《中华人民共和国合同法》、《质量保证协议》、医疗器械相关法律法规等有关规定执行。',format_of_table_head)
             row+=1

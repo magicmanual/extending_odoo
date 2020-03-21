@@ -15,6 +15,13 @@
                     <field name="bed_coding"/>
                     <field name="surgeon"/>
                     <field name="operating_nurse"/>
+                    <field name="external_expert"/>
+                </xpath>
+                <xpath expr="//tree/field[@name='price_subtotal']" position="after">
+                    <field name="is_mask_product" />
+                </xpath>
+                <xpath expr="//field[@name='payment_term_id']" position="after">
+                    <field name="warehouse_id" options="{'no_create': True}" groups="stock.group_stock_multi_warehouses" force_save="1"/>
                 </xpath>
 
             </field>
