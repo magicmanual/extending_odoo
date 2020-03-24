@@ -1,0 +1,6 @@
+addons.sale_stock.models.sale_order.SaleOrder._action_confirm
+addons.sale_stock.models.sale_order.SaleOrderLine._action_launch_stock_rule
+addons.stock.models.stock_rule.ProcurementGroup.run
+getattr
+addons.stock.models.stock_rule.StockRule._run_pull
+moves = self.env['stock.move'].sudo().with_context(force_company=company_id).create(moves_values),addons.stock.models.stock_move.StockMove._action_confirm
