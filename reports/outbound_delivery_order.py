@@ -24,7 +24,8 @@ class OutboundDelieveryOrder(models.Model):
 
 
     def print_lot_and_expire_date(self,stock_production_lot_recordset,sheet,row,column,format_general,format_date):
-            stock_production_lot_recordset.ensure_one()
+            print(stock_production_lot_recordset)
+            #stock_production_lot_recordset.ensure_one()
             sheet.write(row,column,stock_production_lot_recordset.name,format_general)
             sheet.write(row,column+1, stock_production_lot_recordset.expire_date, format_date)
             return
